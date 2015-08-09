@@ -1,0 +1,16 @@
+art/
+doc/
+lib/
+music/
+sound/
+Uninstaller/
+
+*.txt
+.installationinformation
+bc.conf
+build.xml
+
+
+# Comment out sourcecode for the robots if you want
+teams/stormyHaystack
+teams/HAL

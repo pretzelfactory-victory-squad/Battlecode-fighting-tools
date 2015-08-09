@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 java/io
 java/lang
 java/math
@@ -20,3 +21,27 @@ scala/util/control
 scala/util/grammar
 scala/util/logging
 scala/util/regexp
+=======
+java/io
+java/lang
+java/math
+java/util
+java/util/regex
+battlecode/common
+scala
+scala/collection
+scala/collection/generic
+scala/collection/immutable
+scala/collection/interfaces
+scala/collection/mutable
+scala/collection/script
+scala/math
+scala/runtime
+scala/util
+scala/util/automata
+scala/util/continuations
+scala/util/control
+scala/util/grammar
+scala/util/logging
+scala/util/regexp
+>>>>>>> 1623997db038f7b077be79c5535cbcb1380143f1
