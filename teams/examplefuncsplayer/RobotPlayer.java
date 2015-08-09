@@ -1,4 +1,4 @@
-package HAL;
+package examplefuncsplayer;
 
 import battlecode.common.*;
 import java.util.*;
@@ -9,16 +9,7 @@ public class RobotPlayer {
 	static Team enemyTeam;
 	static int myRange;
 	static Random rand;
-	static Direction[] directions = {
-		Direction.NORTH, 
-		Direction.NORTH_EAST, 
-		Direction.EAST, 
-		Direction.SOUTH_EAST, 
-		Direction.SOUTH, 
-		Direction.SOUTH_WEST, 
-		Direction.WEST, 
-		Direction.NORTH_WEST
-	};
+	static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 
 	public static void run(RobotController tomatojuice) {
 		rc = tomatojuice;
@@ -30,7 +21,6 @@ public class RobotPlayer {
 		myTeam = rc.getTeam();
 		enemyTeam = myTeam.opponent();
 		RobotInfo[] myRobots;
-		int totalTowers = rc.senseEnemyTowerLocations().length;
 
 		while(true) {
 			try {
@@ -45,26 +35,6 @@ public class RobotPlayer {
 				try {
 					int fate = rand.nextInt(10000);
 					myRobots = rc.senseNearbyRobots(999999, myTeam);
-					MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-					MapLocation target;
-					if(enemyTowers.length > 0){
-						if(enemyTowers.length != totalTowers){
-							totalTowers = enemyTowers.length;
-							rc.broadcast(7, 0);
-						}
-						int currentClosest = Integer.MAX_VALUE;
-						target = enemyTowers[0];
-						for (MapLocation tower: enemyTowers) {
-							int temp = tower.distanceSquaredTo(rc.getLocation());
-							if(temp < currentClosest){
-								currentClosest = temp;
-								target = tower;
-							}						
-						}
-					}else{
-						target = rc.senseEnemyHQLocation();
-					}
-										
 					int numSoldiers = 0;
 					int numBashers = 0;
 					int numBeavers = 0;
@@ -85,11 +55,7 @@ public class RobotPlayer {
 					rc.broadcast(1, numSoldiers);
 					rc.broadcast(2, numBashers);
 					rc.broadcast(100, numBarracks);
-					rc.broadcast(3, target.x);
-					rc.broadcast(4, target.y);
-					rc.broadcast(5, rc.getLocation().x);
-					rc.broadcast(6, rc.getLocation().y + 3);
-					
+
 					if (rc.isWeaponReady()) {
 						attackSomething();
 					}
@@ -140,21 +106,12 @@ public class RobotPlayer {
 						attackSomething();
 					}
 					if (rc.isCoreReady()) {
-						myRobots = rc.senseNearbyRobots(10, myTeam);
-						int squadSize = 1;
-						MapLocation target = new MapLocation(0,0);
-						for(RobotInfo r : myRobots){
-							if(r.type == RobotType.SOLDIER){
-								++squadSize;
-							}
+						int fate = rand.nextInt(1000);
+						if (fate < 800) {
+							tryMove(directions[rand.nextInt(8)]);
+						} else {
+							tryMove(rc.getLocation().directionTo(rc.senseEnemyHQLocation()));
 						}
-						if(squadSize > 20 || rc.readBroadcast(7) > 0){
-							rc.broadcast(7, 1);
-							target = new MapLocation(rc.readBroadcast(3), rc.readBroadcast(4));					
-						}else{
-							target = new MapLocation(rc.readBroadcast(5), rc.readBroadcast(6));
-						}
-						tryMove(rc.getLocation().directionTo(target));
 					}
 				} catch (Exception e) {
 					System.out.println("Soldier Exception");
