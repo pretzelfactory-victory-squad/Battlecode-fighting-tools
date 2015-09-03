@@ -21,14 +21,21 @@ public class RobotPlayer {
 	static int myRange;
 	static Random rand;
 	static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
-	static MapLocation towerFocus;
+	static MapLocation defenceFocus;
 
 	public static void run(RobotController tomatojuice) {
 		rc = tomatojuice;
 		rand = new Random(rc.getID());
 
 		myRange = rc.getType().attackRadiusSquared;
-		MapLocation enemyLoc = rc.senseEnemyHQLocation();
+		MapLocation enemyTarget = null;
+		MapLocation[] towers = rc.senseEnemyTowerLocations();
+		if(towers == null){
+			enemyTarget = rc.senseEnemyHQLocation();
+		}
+		for(MapLocation l:towers){
+			enemyTarget = l;
+		}
 		Direction lastDirection = null;
 		myTeam = rc.getTeam();
 		enemyTeam = myTeam.opponent();
@@ -129,14 +136,17 @@ public class RobotPlayer {
 					if (rc.isCoreReady()) {
 						MapLocation myLoc = rc.getLocation();
 						
-						if(towerFocus == null){
+						if(defenceFocus == null){
 							List<MapLocation> list = getDefenceLocations();
-							towerFocus = list.get(0);
+							defenceFocus = list.get(rand.nextInt(2));
 						}
 						
-						if (myLoc.distanceSquaredTo(towerFocus) > 2){
+						if (Clock.getRoundNum() >= 1500){
+							// ATTACK BASE
+							tryMove(myLoc.directionTo(enemyTarget));
+						}else if (myLoc.distanceSquaredTo(defenceFocus) > 2){
 							// GO TO FOCUS TOWER
-							tryMove(myLoc.directionTo(towerFocus));
+							tryMove(myLoc.directionTo(defenceFocus));
 						}
 					}
 				} catch (Exception e) {
@@ -153,14 +163,18 @@ public class RobotPlayer {
 					if (rc.isCoreReady()) {
 						MapLocation myLoc = rc.getLocation();
 						
-						if(towerFocus == null){
+						if(defenceFocus == null){
 							List<MapLocation> list = getDefenceLocations();
-							towerFocus = list.get(0);
+							defenceFocus = list.get(rand.nextInt(2));
 						}
 						
-						if (myLoc.distanceSquaredTo(towerFocus) > 2){
+						MapLocation moveTo = defenceFocus.add(defenceFocus.directionTo(rc.senseEnemyHQLocation()), 10);
+						if (Clock.getRoundNum() >= 1500){
+							// ATTACK BASE
+							tryMove(myLoc.directionTo(enemyTarget));
+						} else if (myLoc.distanceSquaredTo(moveTo) > 3){
 							// GO TO FOCUS TOWER
-							tryMove(myLoc.directionTo(towerFocus));
+							tryMove(myLoc.directionTo(moveTo));
 						}
 					}
 				} catch (Exception e) {
@@ -209,7 +223,7 @@ public class RobotPlayer {
 					int numSoldiers = rc.readBroadcast(1);
 					int numBashers = rc.readBroadcast(2);
 
-					if (rc.isCoreReady() && rc.getTeamOre() >= 60 && fate < Math.pow(1.2,3-numSoldiers-numBashers+rc.readBroadcast(MINER))*10000) {
+					if (rc.isCoreReady() && rc.getTeamOre() >= 60 && fate < Math.pow(1.3,1-numSoldiers-numBashers)*10000) {
 						if (rc.getTeamOre() > 80 && fate % 2 == 0) {
 							trySpawn(directions[rand.nextInt(8)],RobotType.BASHER);
 						} else {
@@ -224,7 +238,7 @@ public class RobotPlayer {
 			if (rc.getType() == RobotType.TANKFACTORY) {
 				try {
 					int fate = rand.nextInt(10000);
-					if (rc.isCoreReady() && rc.getTeamOre() >= 250 && fate < Math.pow(1.2,20-rc.readBroadcast(TANK))*10000) {
+					if (rc.isCoreReady() && rc.getTeamOre() >= 250 && fate < Math.pow(1.2,10-rc.readBroadcast(TANK))*10000) {
 						trySpawn(directions[rand.nextInt(8)],RobotType.TANK);
 					}
 				} catch (Exception e) {
@@ -241,14 +255,18 @@ public class RobotPlayer {
 					if (rc.isCoreReady()) {
 						MapLocation myLoc = rc.getLocation();
 						
-						if(towerFocus == null){
+						if(defenceFocus == null){
 							List<MapLocation> list = getDefenceLocations();
-							towerFocus = list.get(0);		
+							defenceFocus = list.get(rand.nextInt(2));
 						}
 						
-						if (myLoc.distanceSquaredTo(towerFocus) > 2){
+						MapLocation moveTo = defenceFocus;
+						if (Clock.getRoundNum() >= 1500){
+							// ATTACK BASE
+							tryMove(myLoc.directionTo(enemyTarget));
+						} else if (myLoc.distanceSquaredTo(moveTo) > 2){
 							// GO TO FOCUS TOWER
-							tryMove(myLoc.directionTo(towerFocus));
+							tryMove(myLoc.directionTo(moveTo));
 						}	
 					}
 				} catch (Exception e) {
